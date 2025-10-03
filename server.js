@@ -124,6 +124,35 @@ app.get("/api/status", (req, res) => {
   });
 });
 
+// Send test notification
+app.post("/api/test-notification", async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "Missing subscription id" });
+    }
+
+    const subscriptionData = subscriptions.get(id);
+
+    if (!subscriptionData) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    const success = await sendNotification(subscriptionData);
+
+    if (success) {
+      console.log(`Test notification sent to ${id}`);
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: "Failed to send notification" });
+    }
+  } catch (error) {
+    console.error("Test notification error:", error);
+    res.status(500).json({ error: "Failed to send test notification" });
+  }
+});
+
 // Helper function to get current hour in user's timezone
 function getCurrentHourInTimezone(timezone) {
   try {

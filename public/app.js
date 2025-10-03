@@ -8,6 +8,7 @@ let vapidPublicKey = null;
 // DOM elements
 const subscribeBtn = document.getElementById("subscribe-btn");
 const unsubscribeBtn = document.getElementById("unsubscribe-btn");
+const testBtn = document.getElementById("test-btn");
 const statusMessage = document.getElementById("status-message");
 
 // Initialize app
@@ -65,17 +66,20 @@ async function updateUI() {
       // User is subscribed
       subscribeBtn.style.display = "none";
       unsubscribeBtn.style.display = "inline-flex";
+      testBtn.style.display = "inline-flex";
       showStatus("You are subscribed to water reminders! 💧", "success");
     } else {
       // Subscription doesn't exist, clear local storage
       clearSubscriptionData();
       subscribeBtn.style.display = "inline-flex";
       unsubscribeBtn.style.display = "none";
+      testBtn.style.display = "none";
     }
   } else {
     // User is not subscribed
     subscribeBtn.style.display = "inline-flex";
     unsubscribeBtn.style.display = "none";
+    testBtn.style.display = "none";
   }
 }
 
@@ -224,9 +228,48 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
+// Send test notification
+async function sendTestNotification() {
+  try {
+    testBtn.disabled = true;
+    showStatus("Sending test notification...", "info");
+
+    const subscriptionId = localStorage.getItem(STORAGE_KEY_ID);
+
+    if (!subscriptionId) {
+      showStatus("No subscription found. Please subscribe first.", "error");
+      testBtn.disabled = false;
+      return;
+    }
+
+    const response = await fetch("/api/test-notification", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: subscriptionId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send test notification");
+    }
+
+    showStatus(
+      "Test notification sent! Check your notifications. 🔔",
+      "success",
+    );
+  } catch (error) {
+    console.error("Test notification failed:", error);
+    showStatus("Failed to send test notification. Please try again.", "error");
+  } finally {
+    testBtn.disabled = false;
+  }
+}
+
 // Event listeners
 subscribeBtn.addEventListener("click", subscribe);
 unsubscribeBtn.addEventListener("click", unsubscribe);
+testBtn.addEventListener("click", sendTestNotification);
 
 // Initialize app when DOM is loaded
 init();
