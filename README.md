@@ -123,9 +123,7 @@ drinkwater/
     ├── app.js            # Frontend logic
     ├── service-worker.js  # Push notification handler
     ├── manifest.json     # PWA manifest
-    └── icons/            # App icons
-        ├── icon-192.png
-        └── icon-512.png
+    └── ios/            # iOS icons
 ```
 
 ## Browser Compatibility

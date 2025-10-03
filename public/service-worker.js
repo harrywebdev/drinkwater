@@ -17,8 +17,8 @@ self.addEventListener("push", (event) => {
   let data = {
     title: "Drink water reminder",
     body: "Stay hydrated!",
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-192.png",
+    icon: "/ios/192.png",
+    badge: "/ios/192.png",
   };
 
   if (event.data) {
@@ -31,8 +31,8 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: data.body,
-    icon: data.icon || "/icons/icon-192.png",
-    badge: data.badge || "/icons/icon-192.png",
+    icon: data.icon || "/ios/192.png",
+    badge: data.badge || "/ios/192.png",
     vibrate: [200, 100, 200],
     tag: "drinkwater-reminder",
     requireInteraction: false,

@@ -218,8 +218,8 @@ async function sendNotification(subscriptionData) {
   const payload = JSON.stringify({
     title: "Drink water reminder",
     body: message,
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-192.png",
+    icon: "/ios/192.png",
+    badge: "/ios/192.png",
     timestamp: Date.now(),
   });
 
