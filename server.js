@@ -314,7 +314,7 @@ async function sendNotification(subscriptionData) {
   const message = await generateWaterReminderMessage();
 
   const payload = JSON.stringify({
-    title: "Drink water reminder",
+    title: "Připomínka pití vody",
     body: message,
     icon: "/ios/192.png",
     badge: "/ios/192.png",

@@ -15,8 +15,8 @@ self.addEventListener("push", (event) => {
   console.log("Push notification received");
 
   let data = {
-    title: "Drink water reminder",
-    body: "Stay hydrated!",
+    title: "Napij se",
+    body: "Zůstaňte hydratovaní!",
     icon: "/ios/192.png",
     badge: "/ios/192.png",
   };
@@ -44,11 +44,11 @@ self.addEventListener("push", (event) => {
     actions: [
       {
         action: "done",
-        title: "Done ✓",
+        title: "Hotovo ✓",
       },
       {
         action: "close",
-        title: "Dismiss",
+        title: "Zavřít",
       },
     ],
   };

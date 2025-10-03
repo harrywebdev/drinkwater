@@ -16,7 +16,7 @@ async function init() {
   // Check if service workers are supported
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
     showStatus(
-      "Push notifications are not supported in your browser.",
+      "Push notifikace nejsou ve vašem prohlížeči podporovány.",
       "error",
     );
     subscribeBtn.disabled = true;
@@ -36,7 +36,7 @@ async function init() {
     await updateUI();
   } catch (error) {
     console.error("Service Worker registration failed:", error);
-    showStatus("Failed to initialize. Please refresh the page.", "error");
+    showStatus("Inicializace selhala. Prosím obnovte stránku.", "error");
   }
 }
 
@@ -67,7 +67,7 @@ async function updateUI() {
       subscribeBtn.style.display = "none";
       unsubscribeBtn.style.display = "inline-flex";
       testBtn.style.display = "inline-flex";
-      showStatus("You are subscribed to water reminders! 💧", "success");
+      showStatus("Připomínky pití vody jsou zapnuté! 💧", "success");
     } else {
       // Subscription doesn't exist, clear local storage
       clearSubscriptionData();
@@ -87,21 +87,21 @@ async function updateUI() {
 async function subscribe() {
   try {
     subscribeBtn.disabled = true;
-    showStatus("Requesting notification permission...", "info");
+    showStatus("Žádám o povolení notifikací...", "info");
 
     // Request notification permission
     const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
       showStatus(
-        "Notification permission denied. Please enable notifications in your browser settings.",
+        "Povolení notifikací zamítnuto. Prosím povolte notifikace v nastavení prohlížeče.",
         "error",
       );
       subscribeBtn.disabled = false;
       return;
     }
 
-    showStatus("Creating subscription...", "info");
+    showStatus("Vytvářím odběr...", "info");
 
     // Get service worker registration
     const registration = await navigator.serviceWorker.ready;
@@ -138,13 +138,13 @@ async function subscribe() {
     localStorage.setItem(STORAGE_KEY_SUBSCRIBED, "true");
 
     showStatus(
-      "Successfully subscribed! You will receive hourly reminders from 8 AM to 8 PM. 🎉",
+      "Úspěšně zapnuto! Budete dostávat připomínky každou hodinu od 8:00 do 20:00. 🎉",
       "success",
     );
     await updateUI();
   } catch (error) {
     console.error("Subscription failed:", error);
-    showStatus("Subscription failed. Please try again.", "error");
+    showStatus("Zapnutí selhalo. Prosím zkuste to znovu.", "error");
     subscribeBtn.disabled = false;
   }
 }
@@ -153,7 +153,7 @@ async function subscribe() {
 async function unsubscribe() {
   try {
     unsubscribeBtn.disabled = true;
-    showStatus("Unsubscribing...", "info");
+    showStatus("Vypínám připomínky...", "info");
 
     const subscriptionId = localStorage.getItem(STORAGE_KEY_ID);
 
@@ -179,15 +179,12 @@ async function unsubscribe() {
     // Clear local storage
     clearSubscriptionData();
 
-    showStatus(
-      "Successfully unsubscribed. You will no longer receive reminders.",
-      "info",
-    );
+    showStatus("Úspěšně vypnuto. Připomínky už nebudete dostávat.", "info");
     subscribeBtn.disabled = false;
     await updateUI();
   } catch (error) {
     console.error("Unsubscribe failed:", error);
-    showStatus("Unsubscribe failed. Please try again.", "error");
+    showStatus("Vypnutí selhalo. Prosím zkuste to znovu.", "error");
   } finally {
     unsubscribeBtn.disabled = false;
   }
@@ -233,12 +230,12 @@ function urlBase64ToUint8Array(base64String) {
 async function sendTestNotification() {
   try {
     testBtn.disabled = true;
-    showStatus("Sending test notification...", "info");
+    showStatus("Odesílám testovací notifikaci...", "info");
 
     const subscriptionId = localStorage.getItem(STORAGE_KEY_ID);
 
     if (!subscriptionId) {
-      showStatus("No subscription found. Please subscribe first.", "error");
+      showStatus("Odběr nenalezen. Prosím zapněte si připomínky.", "error");
       testBtn.disabled = false;
       return;
     }
@@ -256,12 +253,15 @@ async function sendTestNotification() {
     }
 
     showStatus(
-      "Test notification sent! Check your notifications. 🔔",
+      "Testovací notifikace odeslána! Zkontrolujte notifikace. 🔔",
       "success",
     );
   } catch (error) {
     console.error("Test notification failed:", error);
-    showStatus("Failed to send test notification. Please try again.", "error");
+    showStatus(
+      "Odeslání testovací notifikace selhalo. Zkuste to znovu.",
+      "error",
+    );
   } finally {
     testBtn.disabled = false;
   }
