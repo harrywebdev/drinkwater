@@ -32,16 +32,19 @@ A Progressive Web App (PWA) that sends push notifications to remind you to drink
 ### Installation
 
 1. **Clone or navigate to the project directory:**
+
    ```bash
    cd drinkwater
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Start the server:**
+
    ```bash
    npm start
    ```
@@ -84,11 +87,7 @@ Edit these constants in `server.js`:
 ```javascript
 const REMINDER_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 const WINDOW_MINUTES = 15; // ±15 minutes
-const NOTIFICATION_MESSAGES = [
-  "Drink now",
-  "Do your drink",
-  "Why not drink?"
-];
+const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"];
 ```
 
 #### API Endpoints
@@ -97,7 +96,9 @@ const NOTIFICATION_MESSAGES = [
 - `POST /api/subscribe` - Subscribe to notifications
   ```json
   {
-    "subscription": { /* Push subscription object */ },
+    "subscription": {
+      /* Push subscription object */
+    },
     "timezone": "America/New_York"
   }
   ```
@@ -217,4 +218,3 @@ Feel free to submit issues and enhancement requests!
 ---
 
 **Stay hydrated! 💧**
-
