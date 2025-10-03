@@ -24,6 +24,7 @@
     "web-push": "^3.6.6"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.10",
     "prettier": "^3.6.2"
   }
 }
