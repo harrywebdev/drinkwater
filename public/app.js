@@ -183,6 +183,7 @@ async function unsubscribe() {
       "Successfully unsubscribed. You will no longer receive reminders.",
       "info",
     );
+    subscribeBtn.disabled = false;
     await updateUI();
   } catch (error) {
     console.error("Unsubscribe failed:", error);

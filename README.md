@@ -61,16 +61,19 @@ On first run, the server will automatically generate VAPID keys and display them
 #### Option 1: Using .env file (Recommended)
 
 1. Copy `env.example` to `.env`:
+
    ```bash
    cp env.example .env
    ```
 
 2. Run the server once to generate keys:
+
    ```bash
    npm start
    ```
 
 3. Copy the generated keys from the console into your `.env` file:
+
    ```
    VAPID_PUBLIC_KEY="your-generated-public-key"
    VAPID_PRIVATE_KEY="your-generated-private-key"
@@ -81,6 +84,7 @@ On first run, the server will automatically generate VAPID keys and display them
 #### Option 2: Using environment variables
 
 Set them directly in your shell:
+
 ```bash
 export VAPID_PUBLIC_KEY="your-public-key"
 export VAPID_PRIVATE_KEY="your-private-key"
