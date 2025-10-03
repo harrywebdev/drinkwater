@@ -5,6 +5,8 @@ const webpush = require("web-push");
 const cron = require("node-cron");
 const { v4: uuidv4 } = require("uuid");
 const path = require("path");
+const { generateText } = require("ai");
+const { groq } = require("@ai-sdk/groq");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,7 +21,8 @@ const subscriptions = new Map();
 // Configuration
 const REMINDER_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // 8am-8pm
 const WINDOW_MINUTES = 15; // ±15 minutes around each hour
-const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"];
+const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"]; // Fallback messages
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // Generate VAPID keys (in production, store these securely)
 // Run this once: console.log(webpush.generateVAPIDKeys());
@@ -236,15 +239,60 @@ function wasNotificationSentThisHour(lastSent, targetHour, timezone) {
   }
 }
 
+// Generate AI-powered water reminder message
+async function generateWaterReminderMessage() {
+  // If no Groq API key, use fallback messages
+  if (!GROQ_API_KEY || GROQ_API_KEY === "your-groq-api-key-here") {
+    const message =
+      NOTIFICATION_MESSAGES[
+        Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
+      ];
+    return message;
+  }
+
+  try {
+    const { text } = await generateText({
+      model: groq("llama-3.3-70b-versatile"),
+      prompt: `Generate a short, friendly water reminder message in 10 words or less. 
+Be creative, encouraging, and casual. Make it feel personal and motivating.
+Don't use emojis. Just return the message text, nothing else.
+
+Examples of good messages:
+- "Time to hydrate! Your body will thank you"
+- "Quick water break? You deserve it"
+- "Stay refreshed - grab some water now"
+- "Hydration check! Let's drink up"
+
+Generate one unique message:`,
+      maxTokens: 50,
+      temperature: 0.9,
+    });
+
+    // Clean up the response and ensure it's not too long
+    const cleanMessage = text.trim().replace(/^["']|["']$/g, "");
+    return cleanMessage.length > 60
+      ? cleanMessage.substring(0, 60) + "..."
+      : cleanMessage;
+  } catch (error) {
+    console.error(
+      "AI message generation failed, using fallback:",
+      error.message,
+    );
+    // Fallback to predefined messages
+    const message =
+      NOTIFICATION_MESSAGES[
+        Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
+      ];
+    return message;
+  }
+}
+
 // Send notification to a subscription
 async function sendNotification(subscriptionData) {
   const { id, subscription, timezone } = subscriptionData;
 
-  // Random message selection
-  const message =
-    NOTIFICATION_MESSAGES[
-      Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
-    ];
+  // Generate AI-powered message
+  const message = await generateWaterReminderMessage();
 
   const payload = JSON.stringify({
     title: "Drink water reminder",

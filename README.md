@@ -6,7 +6,7 @@ A Progressive Web App (PWA) that sends push notifications to remind you to drink
 
 - 🔔 Hourly push notifications from 8 AM to 8 PM
 - 🌍 Automatic timezone detection
-- 🎲 Random reminder messages to keep it fresh
+- 🤖 AI-generated reminder messages (powered by Groq)
 - 📱 iOS Safari compatible (requires Add to Home Screen)
 - 🚀 No database required - subscriptions stored in memory
 - 🎨 Modern, responsive UI
@@ -28,6 +28,7 @@ A Progressive Web App (PWA) that sends push notifications to remind you to drink
 - HTTPS connection (required for push notifications)
   - Use localhost for development
   - Use a proper SSL certificate for production
+- Groq API key (free tier available at [console.groq.com](https://console.groq.com))
 
 ### Installation
 
@@ -79,7 +80,19 @@ On first run, the server will automatically generate VAPID keys and display them
    VAPID_PRIVATE_KEY="your-generated-private-key"
    ```
 
-4. Restart the server
+4. Get a Groq API key:
+   - Visit [console.groq.com](https://console.groq.com)
+   - Sign up for free
+   - Create an API key
+   - Add to your `.env` file:
+
+   ```
+   GROQ_API_KEY="gsk_..."
+   ```
+
+5. Restart the server
+
+**Note:** If no Groq API key is provided, the app will fall back to predefined messages.
 
 #### Option 2: Using environment variables
 
@@ -165,9 +178,10 @@ drinkwater/
 
 ### Option 1: Traditional Hosting (Heroku, Railway, etc.)
 
-1. Set VAPID keys as environment variables in your hosting platform:
+1. Set environment variables in your hosting platform:
    - `VAPID_PUBLIC_KEY`
    - `VAPID_PRIVATE_KEY`
+   - `GROQ_API_KEY` (optional, but recommended for AI messages)
 2. Deploy the app
 3. Ensure HTTPS is enabled (required for push notifications)
 
@@ -210,6 +224,14 @@ drinkwater/
 - Each subscription tracks last notification sent to prevent duplicates
 - Scheduler runs every minute to check eligibility
 
+### AI Message Generation
+
+- Uses Groq's `llama-3.3-70b-versatile` model for fast, creative messages
+- Each notification gets a unique, personalized message
+- Fallback to predefined messages if AI fails or no API key is set
+- Average generation time: ~200-500ms
+- Messages are limited to 60 characters for notification compatibility
+
 ### Data Storage
 
 - Subscriptions stored in-memory (Map structure)
@@ -231,10 +253,11 @@ drinkwater/
 
 - Change notification frequency (every 30 minutes, every 2 hours, etc.)
 - Add custom time ranges (e.g., 6 AM - 10 PM)
-- More reminder messages
+- Customize AI prompt for different message styles
 - Add water intake tracking
 - Persistent storage with Redis/database
 - User-configurable schedules
+- Use different LLM models (GPT-4, Claude, etc.)
 
 ## License
 

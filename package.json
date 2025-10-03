@@ -17,6 +17,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@ai-sdk/groq": "^1.0.8",
+    "ai": "^4.0.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "node-cron": "^3.0.3",
