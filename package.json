@@ -1,0 +1,25 @@
+{
+  "name": "drinkwater-reminder",
+  "version": "1.0.0",
+  "description": "Web-based water reminder with push notifications",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "water",
+    "reminder",
+    "push-notifications",
+    "pwa"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "web-push": "^3.6.6",
+    "node-cron": "^3.0.3",
+    "uuid": "^9.0.1"
+  }
+}
+
