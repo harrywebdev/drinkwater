@@ -56,15 +56,35 @@ A Progressive Web App (PWA) that sends push notifications to remind you to drink
 
 ### First Run - VAPID Keys
 
-On first run, the server will automatically generate VAPID keys and display them in the console. For production, you should:
+On first run, the server will automatically generate VAPID keys and display them in the console. For production, you should save these keys:
 
-1. Copy the generated keys from the console output
-2. Set them as environment variables:
+#### Option 1: Using .env file (Recommended)
+
+1. Copy `env.example` to `.env`:
    ```bash
-   export VAPID_PUBLIC_KEY="your-public-key"
-   export VAPID_PRIVATE_KEY="your-private-key"
+   cp env.example .env
    ```
-3. Or create a `.env` file (if you add dotenv support)
+
+2. Run the server once to generate keys:
+   ```bash
+   npm start
+   ```
+
+3. Copy the generated keys from the console into your `.env` file:
+   ```
+   VAPID_PUBLIC_KEY="your-generated-public-key"
+   VAPID_PRIVATE_KEY="your-generated-private-key"
+   ```
+
+4. Restart the server
+
+#### Option 2: Using environment variables
+
+Set them directly in your shell:
+```bash
+export VAPID_PUBLIC_KEY="your-public-key"
+export VAPID_PRIVATE_KEY="your-private-key"
+```
 
 ## Usage
 
@@ -116,6 +136,9 @@ const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"];
 drinkwater/
 ├── server.js                 # Express server + notification scheduler
 ├── package.json             # Dependencies
+├── env.example             # Environment variables template
+├── .env                    # Your local environment variables (create from env.example)
+├── .gitignore             # Git ignore rules
 ├── README.md               # This file
 └── public/                 # Static files
     ├── index.html         # Main app page
@@ -138,9 +161,13 @@ drinkwater/
 
 ### Option 1: Traditional Hosting (Heroku, Railway, etc.)
 
-1. Ensure VAPID keys are set as environment variables
+1. Set VAPID keys as environment variables in your hosting platform:
+   - `VAPID_PUBLIC_KEY`
+   - `VAPID_PRIVATE_KEY`
 2. Deploy the app
 3. Ensure HTTPS is enabled (required for push notifications)
+
+**Note:** Don't commit your `.env` file to version control!
 
 ### Option 2: Local Network (for testing)
 
