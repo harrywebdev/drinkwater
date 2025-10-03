@@ -21,7 +21,11 @@ const subscriptions = new Map();
 // Configuration
 const REMINDER_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // 8am-8pm
 const WINDOW_MINUTES = 15; // ±15 minutes around each hour
-const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"]; // Fallback messages
+const NOTIFICATION_MESSAGES = [
+  "Neboj se, napij se!",
+  "Kdo nepije, nežije!",
+  "Kde bys byl, kdyby ses nenapil?",
+]; // Fallback messages
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // Generate VAPID keys (in production, store these securely)
@@ -252,27 +256,42 @@ async function generateWaterReminderMessage() {
 
   try {
     const { text } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
-      prompt: `Generate a short, friendly water reminder message in 10 words or less. 
-Be creative, encouraging, and casual. Make it feel personal and motivating.
-Don't use emojis. Just return the message text, nothing else.
+      // https://console.groq.com/docs/models
+      //  * llama-3.3-70b-versatile
+      //  *
+      model: groq("openai/gpt-oss-120b"),
+      prompt: `Vytvoř krátkou, přátelskou připomínku pití vody do 8 slov (česky).
+Buď kreativní, nenucený, zábavný. Nepoužívej emoji. Vrať pouze text zprávy, nic víc.
 
-Examples of good messages:
-- "Time to hydrate! Your body will thank you"
-- "Quick water break? You deserve it"
-- "Stay refreshed - grab some water now"
-- "Hydration check! Let's drink up"
+Příklady dobrých zpráv:
+- "Je čas se napít! Tvoje tělo ti poděkuje"
+- "Zůstaň svěží – dej si teď vodu"
+- "Neboj se, napij se!"
+- "Kdo nepije, nežije!"
+- "Kde bys byla, kdyby ses nenapila?"
 
-Generate one unique message:`,
-      maxTokens: 50,
+Vygeneruj jednu jedinečnou zprávu:`,
+      maxTokens: 500,
       temperature: 0.9,
     });
 
+    console.log("AI message generated:", text);
+
     // Clean up the response and ensure it's not too long
     const cleanMessage = text.trim().replace(/^["']|["']$/g, "");
-    return cleanMessage.length > 60
-      ? cleanMessage.substring(0, 60) + "..."
-      : cleanMessage;
+
+    const finalMessage =
+      cleanMessage.length > 60
+        ? cleanMessage.substring(0, 60) + "..."
+        : cleanMessage;
+
+    if (!finalMessage) {
+      return NOTIFICATION_MESSAGES[
+        Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
+      ];
+    }
+
+    return finalMessage;
   } catch (error) {
     console.error(
       "AI message generation failed, using fallback:",
