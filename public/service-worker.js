@@ -40,6 +40,7 @@ self.addEventListener("push", (event) => {
     data: {
       dateOfArrival: Date.now(),
       primaryKey: data.timestamp || Date.now(),
+      url: data.url || "/", // Store URL from notification payload
     },
     actions: [
       {
@@ -64,7 +65,9 @@ self.addEventListener("notificationclick", (event) => {
 
   // If user clicks on notification (not action button), open the app
   if (event.action === "" || event.action === "done") {
-    event.waitUntil(clients.openWindow("/"));
+    // Get URL from notification data (defaults to "/")
+    const url = event.notification.data?.url || "/";
+    event.waitUntil(clients.openWindow(url));
   }
 });
 

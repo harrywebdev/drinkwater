@@ -34,6 +34,17 @@ const NOTIFICATION_TITLES = {
   en: "Water reminder",
 };
 
+const RESUBSCRIBE_MESSAGES = {
+  cs: {
+    title: "Aktualizace serveru",
+    body: "Váš odběr brzy vyprší. Klepněte pro opětovné zapnutí připomínek.",
+  },
+  en: {
+    title: "Server Update",
+    body: "Your subscription will expire soon. Tap to re-subscribe.",
+  },
+};
+
 const AI_PROMPTS = {
   cs: `Vytvoř krátkou, přátelskou připomínku pití vody do 8 slov (česky).
 Buď kreativní, nenucený, zábavný. Nepoužívej emoji. Vrať pouze text zprávy, nic víc.
@@ -211,6 +222,39 @@ app.post("/api/test-notification", async (req, res) => {
   }
 });
 
+// Send resubscribe notification to all subscribers (for pre-deployment)
+app.post("/api/notify-resubscribe", async (req, res) => {
+  try {
+    console.log(
+      `\n🔔 Sending resubscribe notifications to all ${subscriptions.size} subscribers...`,
+    );
+
+    const results = {
+      total: subscriptions.size,
+      sent: 0,
+      failed: 0,
+    };
+
+    for (const [id, subscriptionData] of subscriptions) {
+      const success = await sendResubscribeNotification(subscriptionData);
+      if (success) {
+        results.sent++;
+      } else {
+        results.failed++;
+      }
+    }
+
+    console.log(
+      `✅ Resubscribe notifications complete: ${results.sent} sent, ${results.failed} failed`,
+    );
+
+    res.json(results);
+  } catch (error) {
+    console.error("Resubscribe notification error:", error);
+    res.status(500).json({ error: "Failed to send resubscribe notifications" });
+  }
+});
+
 // Helper function to get current hour in user's timezone
 function getCurrentHourInTimezone(timezone) {
   try {
@@ -367,6 +411,42 @@ async function sendNotification(subscriptionData) {
     return true;
   } catch (error) {
     console.error(`Failed to send notification to ${id}:`, error);
+
+    // If subscription is expired or invalid (410 Gone), remove it
+    if (error.statusCode === 410 || error.statusCode === 404) {
+      console.log(`Removing invalid subscription: ${id}`);
+      subscriptions.delete(id);
+    }
+
+    return false;
+  }
+}
+
+// Send resubscribe notification to a subscription
+async function sendResubscribeNotification(subscriptionData) {
+  const { id, subscription, locale } = subscriptionData;
+
+  // Map locale to supported language
+  const lang = mapLocaleToLanguage(locale);
+
+  // Get localized resubscribe message
+  const message = RESUBSCRIBE_MESSAGES[lang];
+
+  const payload = JSON.stringify({
+    title: message.title,
+    body: message.body,
+    icon: "/ios/192.png",
+    badge: "/ios/192.png",
+    timestamp: Date.now(),
+    url: "/?resubscribe=1", // Open with resubscribe parameter
+  });
+
+  try {
+    await webpush.sendNotification(subscription, payload);
+    console.log(`Resubscribe notification sent to ${id} (${lang})`);
+    return true;
+  } catch (error) {
+    console.error(`Failed to send resubscribe notification to ${id}:`, error);
 
     // If subscription is expired or invalid (410 Gone), remove it
     if (error.statusCode === 410 || error.statusCode === 404) {

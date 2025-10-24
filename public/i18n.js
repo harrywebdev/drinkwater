@@ -41,6 +41,7 @@ const translations = {
       testNotFound: "Odběr nenalezen. Prosím zapněte si připomínky.",
       testSuccess: "Testovací notifikace odeslána! Zkontrolujte notifikace. 🔔",
       testFailed: "Odeslání testovací notifikace selhalo. Zkuste to znovu.",
+      resubscribeNeeded: "Váš odběr vypršel kvůli aktualizaci serveru. Prosím zapněte připomínky znovu. 🔄",
     },
   },
   en: {
@@ -84,6 +85,7 @@ const translations = {
       testNotFound: "No subscription found. Please subscribe first.",
       testSuccess: "Test notification sent! Check your notifications. 🔔",
       testFailed: "Failed to send test notification. Please try again.",
+      resubscribeNeeded: "Your subscription expired due to server update. Please subscribe again. 🔄",
     },
   },
 };

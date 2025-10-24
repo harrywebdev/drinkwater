@@ -136,7 +136,8 @@ const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"];
     "subscription": {
       /* Push subscription object */
     },
-    "timezone": "America/New_York"
+    "timezone": "America/New_York",
+    "locale": "en_US"
   }
   ```
 - `POST /api/unsubscribe` - Unsubscribe from notifications
@@ -146,6 +147,8 @@ const NOTIFICATION_MESSAGES = ["Drink now", "Do your drink", "Why not drink?"];
   }
   ```
 - `GET /api/status` - Get server status and subscription count
+- `POST /api/test-notification` - Send a test notification (for debugging)
+- `POST /api/notify-resubscribe` - Send resubscribe notification to all users (for pre-deployment)
 
 ## Project Structure
 
@@ -157,10 +160,13 @@ drinkwater/
 ├── .env                    # Your local environment variables (create from env.example)
 ├── .gitignore             # Git ignore rules
 ├── README.md               # This file
+├── DEPLOYMENT.md          # Deployment guide with pre-deployment notifications
+├── notify-before-deploy.sh # Pre-deployment notification script
 └── public/                 # Static files
     ├── index.html         # Main app page
     ├── styles.css         # Styling
     ├── app.js            # Frontend logic
+    ├── i18n.js           # Internationalization (Czech/English)
     ├── service-worker.js  # Push notification handler
     ├── manifest.json     # PWA manifest
     └── ios/            # iOS icons
@@ -176,14 +182,35 @@ drinkwater/
 
 ## Deployment
 
+### ⚠️ Important: Pre-deployment Notifications
+
+Since subscriptions are stored in memory, **they will be lost when you deploy a new version**. To minimize disruption, send a notification to all users before deploying:
+
+```bash
+# Run this BEFORE deploying
+./notify-before-deploy.sh
+
+# Or for production
+./notify-before-deploy.sh https://your-production-url.fly.dev
+```
+
+This will:
+1. Send a notification to all users: "Your subscription will expire soon. Tap to re-subscribe."
+2. When tapped, users will be prompted to re-subscribe
+3. Their subscription data will be cleared automatically
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+
 ### Option 1: Traditional Hosting (Heroku, Railway, etc.)
 
 1. Set environment variables in your hosting platform:
    - `VAPID_PUBLIC_KEY`
    - `VAPID_PRIVATE_KEY`
    - `GROQ_API_KEY` (optional, but recommended for AI messages)
-2. Deploy the app
-3. Ensure HTTPS is enabled (required for push notifications)
+2. **Before deploying**, run `./notify-before-deploy.sh https://your-app-url.com`
+3. Wait 2-5 minutes for users to receive notifications
+4. Deploy the app
+5. Ensure HTTPS is enabled (required for push notifications)
 
 **Note:** Don't commit your `.env` file to version control!
 
