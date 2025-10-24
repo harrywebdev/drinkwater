@@ -21,12 +21,43 @@ const subscriptions = new Map();
 // Configuration
 const REMINDER_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]; // 8am-8pm
 const WINDOW_MINUTES = 15; // ±15 minutes around each hour
-const NOTIFICATION_MESSAGES = [
-  "Neboj se, napij se!",
-  "Kdo nepije, nežije!",
-  "Kde bys byl, kdyby ses nenapil?",
-]; // Fallback messages
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+// Localized content
+const FALLBACK_MESSAGES = {
+  cs: ["Neboj se, napij se!", "Kdo nepije, nežije!", "Kde bys byl, kdyby ses nenapil?"],
+  en: ["Time to hydrate!", "Drink up!", "Stay refreshed!"],
+};
+
+const NOTIFICATION_TITLES = {
+  cs: "Připomínka pití vody",
+  en: "Water reminder",
+};
+
+const AI_PROMPTS = {
+  cs: `Vytvoř krátkou, přátelskou připomínku pití vody do 8 slov (česky).
+Buď kreativní, nenucený, zábavný. Nepoužívej emoji. Vrať pouze text zprávy, nic víc.
+
+Příklady dobrých zpráv:
+- "Je čas se napít! Tvoje tělo ti poděkuje"
+- "Zůstaň svěží – dej si teď vodu"
+- "Neboj se, napij se!"
+- "Kdo nepije, nežije!"
+- "Kde bys byla, kdyby ses nenapila?"
+
+Vygeneruj jednu jedinečnou zprávu:`,
+  en: `Generate a short, friendly water reminder in 10 words or less.
+Be creative, encouraging, and casual. Make it feel personal and motivating.
+Don't use emojis. Just return the message text, nothing else.
+
+Examples of good messages:
+- "Time to hydrate! Your body will thank you"
+- "Quick water break? You deserve it"
+- "Stay refreshed - grab some water now"
+- "Hydration check! Let's drink up"
+
+Generate one unique message:`,
+};
 
 // Generate VAPID keys (in production, store these securely)
 // Run this once: console.log(webpush.generateVAPIDKeys());
@@ -63,6 +94,22 @@ if (
   );
 }
 
+// Helper function to map locale to supported language
+function mapLocaleToLanguage(locale) {
+  if (!locale) return "en";
+
+  // Extract base language (cs_CZ → cs, en_US → en)
+  const baseLang = locale.split("_")[0].toLowerCase();
+
+  // Check if it's Czech
+  if (baseLang === "cs") {
+    return "cs";
+  }
+
+  // Default to English for everything else
+  return "en";
+}
+
 // API Routes
 
 // Get VAPID public key
@@ -73,7 +120,7 @@ app.get("/api/vapid-public-key", (req, res) => {
 // Subscribe to notifications
 app.post("/api/subscribe", (req, res) => {
   try {
-    const { subscription, timezone } = req.body;
+    const { subscription, timezone, locale } = req.body;
 
     if (!subscription || !timezone) {
       return res
@@ -86,13 +133,15 @@ app.post("/api/subscribe", (req, res) => {
       id,
       subscription,
       timezone,
+      locale: locale || "en_US", // Store full locale (e.g., 'cs_CZ', 'en_US')
       subscribedAt: new Date(),
       lastNotificationSent: null,
     };
 
     subscriptions.set(id, subscriptionData);
 
-    console.log(`New subscription added: ${id} (Timezone: ${timezone})`);
+    const lang = mapLocaleToLanguage(locale);
+    console.log(`New subscription added: ${id} (Timezone: ${timezone}, Locale: ${locale}, Lang: ${lang})`);
     console.log(`Total subscriptions: ${subscriptions.size}`);
 
     res.status(201).json({ id });
@@ -244,38 +293,26 @@ function wasNotificationSentThisHour(lastSent, targetHour, timezone) {
 }
 
 // Generate AI-powered water reminder message
-async function generateWaterReminderMessage() {
+async function generateWaterReminderMessage(locale) {
+  // Map locale to supported language
+  const lang = mapLocaleToLanguage(locale);
+
   // If no Groq API key, use fallback messages
   if (!GROQ_API_KEY || GROQ_API_KEY === "your-groq-api-key-here") {
-    const message =
-      NOTIFICATION_MESSAGES[
-        Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
-      ];
-    return message;
+    const messages = FALLBACK_MESSAGES[lang];
+    return messages[Math.floor(Math.random() * messages.length)];
   }
 
   try {
     const { text } = await generateText({
       // https://console.groq.com/docs/models
-      //  * llama-3.3-70b-versatile
-      //  *
-      model: groq("openai/gpt-oss-120b"),
-      prompt: `Vytvoř krátkou, přátelskou připomínku pití vody do 8 slov (česky).
-Buď kreativní, nenucený, zábavný. Nepoužívej emoji. Vrať pouze text zprávy, nic víc.
-
-Příklady dobrých zpráv:
-- "Je čas se napít! Tvoje tělo ti poděkuje"
-- "Zůstaň svěží – dej si teď vodu"
-- "Neboj se, napij se!"
-- "Kdo nepije, nežije!"
-- "Kde bys byla, kdyby ses nenapila?"
-
-Vygeneruj jednu jedinečnou zprávu:`,
+      model: groq("llama-3.3-70b-versatile"),
+      prompt: AI_PROMPTS[lang],
       maxTokens: 500,
       temperature: 0.9,
     });
 
-    console.log("AI message generated:", text);
+    console.log(`AI message generated (${lang}):`, text);
 
     // Clean up the response and ensure it's not too long
     const cleanMessage = text.trim().replace(/^["']|["']$/g, "");
@@ -286,9 +323,8 @@ Vygeneruj jednu jedinečnou zprávu:`,
         : cleanMessage;
 
     if (!finalMessage) {
-      return NOTIFICATION_MESSAGES[
-        Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
-      ];
+      const messages = FALLBACK_MESSAGES[lang];
+      return messages[Math.floor(Math.random() * messages.length)];
     }
 
     return finalMessage;
@@ -297,24 +333,27 @@ Vygeneruj jednu jedinečnou zprávu:`,
       "AI message generation failed, using fallback:",
       error.message,
     );
-    // Fallback to predefined messages
-    const message =
-      NOTIFICATION_MESSAGES[
-        Math.floor(Math.random() * NOTIFICATION_MESSAGES.length)
-      ];
-    return message;
+    // Fallback to predefined messages in correct language
+    const messages = FALLBACK_MESSAGES[lang];
+    return messages[Math.floor(Math.random() * messages.length)];
   }
 }
 
 // Send notification to a subscription
 async function sendNotification(subscriptionData) {
-  const { id, subscription, timezone } = subscriptionData;
+  const { id, subscription, timezone, locale } = subscriptionData;
 
-  // Generate AI-powered message
-  const message = await generateWaterReminderMessage();
+  // Map locale to supported language
+  const lang = mapLocaleToLanguage(locale);
+
+  // Generate AI-powered message in user's language
+  const message = await generateWaterReminderMessage(locale);
+
+  // Use localized notification title
+  const title = NOTIFICATION_TITLES[lang];
 
   const payload = JSON.stringify({
-    title: "Připomínka pití vody",
+    title: title,
     body: message,
     icon: "/ios/192.png",
     badge: "/ios/192.png",
@@ -324,7 +363,7 @@ async function sendNotification(subscriptionData) {
   try {
     await webpush.sendNotification(subscription, payload);
     subscriptions.get(id).lastNotificationSent = new Date();
-    console.log(`Notification sent to ${id} (${timezone}): "${message}"`);
+    console.log(`Notification sent to ${id} (${timezone}, ${lang}): "${message}"`);
     return true;
   } catch (error) {
     console.error(`Failed to send notification to ${id}:`, error);

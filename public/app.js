@@ -5,20 +5,51 @@ const STORAGE_KEY_SUBSCRIBED = "drinkwater_subscribed";
 
 let vapidPublicKey = null;
 
+// i18n variables
+let userLocale = getFullBrowserLanguage(); // e.g., 'cs_CZ', 'en_US'
+let currentLang = mapToSupportedLanguage(userLocale); // e.g., 'cs', 'en'
+
 // DOM elements
 const subscribeBtn = document.getElementById("subscribe-btn");
 const unsubscribeBtn = document.getElementById("unsubscribe-btn");
 const testBtn = document.getElementById("test-btn");
 const statusMessage = document.getElementById("status-message");
 
+// Apply translations to the page
+function applyTranslations(lang) {
+  // Update document title
+  document.title = t("page.title", lang);
+
+  // Update html lang attribute
+  document.documentElement.lang = lang;
+
+  // Update all elements with data-i18n attribute
+  document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const key = element.getAttribute("data-i18n");
+    const translation = t(key, lang);
+
+    // Handle HTML content (for iosNotice and info.text)
+    if (key === "iosNotice" || key === "info.text") {
+      element.innerHTML = translation;
+    } else {
+      element.textContent = translation;
+    }
+  });
+
+  // Update elements with data-i18n-title attribute (for title/tooltip)
+  document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-title");
+    element.title = t(key, lang);
+  });
+}
+
 // Initialize app
 async function init() {
+  // Apply translations first
+  applyTranslations(currentLang);
   // Check if service workers are supported
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-    showStatus(
-      "Push notifikace nejsou ve vašem prohlížeči podporovány.",
-      "error",
-    );
+    showStatus(t("status.notSupported", currentLang), "error");
     subscribeBtn.disabled = true;
     return;
   }
@@ -36,7 +67,7 @@ async function init() {
     await updateUI();
   } catch (error) {
     console.error("Service Worker registration failed:", error);
-    showStatus("Inicializace selhala. Prosím obnovte stránku.", "error");
+    showStatus(t("status.initFailed", currentLang), "error");
   }
 }
 
@@ -67,7 +98,7 @@ async function updateUI() {
       subscribeBtn.style.display = "none";
       unsubscribeBtn.style.display = "inline-flex";
       testBtn.style.display = "inline-flex";
-      showStatus("Připomínky pití vody jsou zapnuté! 💧", "success");
+      showStatus(t("status.subscribed", currentLang), "success");
     } else {
       // Subscription doesn't exist, clear local storage
       clearSubscriptionData();
@@ -87,21 +118,18 @@ async function updateUI() {
 async function subscribe() {
   try {
     subscribeBtn.disabled = true;
-    showStatus("Žádám o povolení notifikací...", "info");
+    showStatus(t("status.requestingPermission", currentLang), "info");
 
     // Request notification permission
     const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
-      showStatus(
-        "Povolení notifikací zamítnuto. Prosím povolte notifikace v nastavení prohlížeče.",
-        "error",
-      );
+      showStatus(t("status.permissionDenied", currentLang), "error");
       subscribeBtn.disabled = false;
       return;
     }
 
-    showStatus("Vytvářím odběr...", "info");
+    showStatus(t("status.creatingSubscription", currentLang), "info");
 
     // Get service worker registration
     const registration = await navigator.serviceWorker.ready;
@@ -115,7 +143,7 @@ async function subscribe() {
     // Get user's timezone
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // Send subscription to server
+    // Send subscription to server with full locale
     const response = await fetch("/api/subscribe", {
       method: "POST",
       headers: {
@@ -124,6 +152,7 @@ async function subscribe() {
       body: JSON.stringify({
         subscription: subscription.toJSON(),
         timezone: timezone,
+        locale: userLocale, // Send full locale (e.g., 'cs_CZ', 'en_US')
       }),
     });
 
@@ -137,14 +166,11 @@ async function subscribe() {
     localStorage.setItem(STORAGE_KEY_ID, data.id);
     localStorage.setItem(STORAGE_KEY_SUBSCRIBED, "true");
 
-    showStatus(
-      "Úspěšně zapnuto! Budete dostávat připomínky každou hodinu od 8:00 do 20:00. 🎉",
-      "success",
-    );
+    showStatus(t("status.subscribeSuccess", currentLang), "success");
     await updateUI();
   } catch (error) {
     console.error("Subscription failed:", error);
-    showStatus("Zapnutí selhalo. Prosím zkuste to znovu.", "error");
+    showStatus(t("status.subscribeFailed", currentLang), "error");
     subscribeBtn.disabled = false;
   }
 }
@@ -153,7 +179,7 @@ async function subscribe() {
 async function unsubscribe() {
   try {
     unsubscribeBtn.disabled = true;
-    showStatus("Vypínám připomínky...", "info");
+    showStatus(t("status.unsubscribing", currentLang), "info");
 
     const subscriptionId = localStorage.getItem(STORAGE_KEY_ID);
 
@@ -179,12 +205,12 @@ async function unsubscribe() {
     // Clear local storage
     clearSubscriptionData();
 
-    showStatus("Úspěšně vypnuto. Připomínky už nebudete dostávat.", "info");
+    showStatus(t("status.unsubscribeSuccess", currentLang), "info");
     subscribeBtn.disabled = false;
     await updateUI();
   } catch (error) {
     console.error("Unsubscribe failed:", error);
-    showStatus("Vypnutí selhalo. Prosím zkuste to znovu.", "error");
+    showStatus(t("status.unsubscribeFailed", currentLang), "error");
   } finally {
     unsubscribeBtn.disabled = false;
   }
@@ -230,12 +256,12 @@ function urlBase64ToUint8Array(base64String) {
 async function sendTestNotification() {
   try {
     testBtn.disabled = true;
-    showStatus("Odesílám testovací notifikaci...", "info");
+    showStatus(t("status.sendingTest", currentLang), "info");
 
     const subscriptionId = localStorage.getItem(STORAGE_KEY_ID);
 
     if (!subscriptionId) {
-      showStatus("Odběr nenalezen. Prosím zapněte si připomínky.", "error");
+      showStatus(t("status.testNotFound", currentLang), "error");
       testBtn.disabled = false;
       return;
     }
@@ -252,16 +278,10 @@ async function sendTestNotification() {
       throw new Error("Failed to send test notification");
     }
 
-    showStatus(
-      "Testovací notifikace odeslána! Zkontrolujte notifikace. 🔔",
-      "success",
-    );
+    showStatus(t("status.testSuccess", currentLang), "success");
   } catch (error) {
     console.error("Test notification failed:", error);
-    showStatus(
-      "Odeslání testovací notifikace selhalo. Zkuste to znovu.",
-      "error",
-    );
+    showStatus(t("status.testFailed", currentLang), "error");
   } finally {
     testBtn.disabled = false;
   }

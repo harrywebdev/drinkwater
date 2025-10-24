@@ -1,7 +1,7 @@
 {
-  "name": "Připomínka pití vody",
-  "short_name": "Napij se",
-  "description": "Zůstaňte hydratovaní s pravidelnými připomínkami od 8:00 do 20:00",
+  "name": "Water Reminder",
+  "short_name": "Drink Water",
+  "description": "Stay hydrated with hourly reminders from 8 AM to 8 PM",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
