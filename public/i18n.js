@@ -41,7 +41,8 @@ const translations = {
       testNotFound: "Odběr nenalezen. Prosím zapněte si připomínky.",
       testSuccess: "Testovací notifikace odeslána! Zkontrolujte notifikace. 🔔",
       testFailed: "Odeslání testovací notifikace selhalo. Zkuste to znovu.",
-      resubscribeNeeded: "Váš odběr vypršel kvůli aktualizaci serveru. Prosím zapněte připomínky znovu. 🔄",
+      resubscribeNeeded:
+        "Váš odběr vypršel kvůli aktualizaci serveru. Prosím, za několik minut zapněte připomínky znovu. 🔄",
     },
   },
   en: {
@@ -85,15 +86,15 @@ const translations = {
       testNotFound: "No subscription found. Please subscribe first.",
       testSuccess: "Test notification sent! Check your notifications. 🔔",
       testFailed: "Failed to send test notification. Please try again.",
-      resubscribeNeeded: "Your subscription expired due to server update. Please subscribe again. 🔄",
+      resubscribeNeeded:
+        "Your subscription expired due to server update. Please subscribe again in a few minutes. 🔄",
     },
   },
 };
 
 // Get full browser locale (e.g., 'cs_CZ', 'en_US', 'pt_BR')
 function getFullBrowserLanguage() {
-  const browserLang =
-    navigator.language || navigator.languages?.[0] || "en-US";
+  const browserLang = navigator.language || navigator.languages?.[0] || "en-US";
   // Convert dash to underscore (cs-CZ → cs_CZ)
   return browserLang.replace("-", "_");
 }
@@ -134,4 +135,3 @@ function t(key, lang) {
 function getTranslations(lang) {
   return translations[lang] || translations.en;
 }
-

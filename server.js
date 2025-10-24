@@ -25,7 +25,11 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 // Localized content
 const FALLBACK_MESSAGES = {
-  cs: ["Neboj se, napij se!", "Kdo nepije, nežije!", "Kde bys byl, kdyby ses nenapil?"],
+  cs: [
+    "Neboj se, napij se!",
+    "Kdo nepije, nežije!",
+    "Kde bys byl, kdyby ses nenapil?",
+  ],
   en: ["Time to hydrate!", "Drink up!", "Stay refreshed!"],
 };
 
@@ -152,7 +156,9 @@ app.post("/api/subscribe", (req, res) => {
     subscriptions.set(id, subscriptionData);
 
     const lang = mapLocaleToLanguage(locale);
-    console.log(`New subscription added: ${id} (Timezone: ${timezone}, Locale: ${locale}, Lang: ${lang})`);
+    console.log(
+      `New subscription added: ${id} (Timezone: ${timezone}, Locale: ${locale}, Lang: ${lang})`,
+    );
     console.log(`Total subscriptions: ${subscriptions.size}`);
 
     res.status(201).json({ id });
@@ -407,7 +413,9 @@ async function sendNotification(subscriptionData) {
   try {
     await webpush.sendNotification(subscription, payload);
     subscriptions.get(id).lastNotificationSent = new Date();
-    console.log(`Notification sent to ${id} (${timezone}, ${lang}): "${message}"`);
+    console.log(
+      `Notification sent to ${id} (${timezone}, ${lang}): "${message}"`,
+    );
     return true;
   } catch (error) {
     console.error(`Failed to send notification to ${id}:`, error);

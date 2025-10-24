@@ -47,20 +47,20 @@ function applyTranslations(lang) {
 async function init() {
   // Apply translations first
   applyTranslations(currentLang);
-  
+
   // Check for resubscribe query parameter
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('resubscribe') === '1') {
+  if (urlParams.get("resubscribe") === "1") {
     // Clear subscription data
     clearSubscriptionData();
-    
+
     // Clean up URL without refreshing
     window.history.replaceState({}, document.title, window.location.pathname);
-    
+
     // Show resubscribe message
     showStatus(t("status.resubscribeNeeded", currentLang), "info");
   }
-  
+
   // Check if service workers are supported
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
     showStatus(t("status.notSupported", currentLang), "error");

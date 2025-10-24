@@ -7,6 +7,7 @@ When deploying a new version of the server, all subscriptions stored in memory a
 ## Solution
 
 Before each deployment, send a notification to all subscribers telling them to re-subscribe. When they tap the notification, the app will:
+
 1. Open automatically
 2. Clear their local subscription data
 3. Show a message prompting them to re-subscribe
@@ -55,6 +56,7 @@ curl -X POST https://your-production-url.fly.dev/api/notify-resubscribe && fly d
 ```
 
 This will:
+
 1. Send notifications to all users
 2. Deploy the new version
 
@@ -79,6 +81,7 @@ This will:
 Before using this in production, you can test the flow locally:
 
 1. **Start your local server**:
+
    ```bash
    npm start
    ```
@@ -86,6 +89,7 @@ Before using this in production, you can test the flow locally:
 2. **Subscribe to notifications** in your browser (http://localhost:3000)
 
 3. **Run the notification script**:
+
    ```bash
    ./notify-before-deploy.sh
    ```
@@ -114,6 +118,7 @@ Before using this in production, you can test the flow locally:
 ## Future Improvements
 
 Consider implementing persistent storage for subscriptions:
+
 - Database (PostgreSQL, MongoDB, etc.)
 - Redis
 - File-based storage
@@ -146,11 +151,13 @@ This would eliminate the need for pre-deployment notifications entirely.
 **POST** `/api/notify-resubscribe`
 
 Sends a special notification to all current subscribers with:
+
 - Localized message (Czech/English)
 - URL parameter `?resubscribe=1`
 - Instructions to re-subscribe
 
 **Response**:
+
 ```json
 {
   "total": 150,
@@ -162,7 +169,7 @@ Sends a special notification to all current subscribers with:
 ### URL Parameter
 
 `?resubscribe=1` - When present, triggers:
+
 1. Clearing of `localStorage` subscription data
 2. Display of resubscribe prompt
 3. Automatic cleanup of URL (removed from address bar)
-

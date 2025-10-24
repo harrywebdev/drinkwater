@@ -195,6 +195,7 @@ Since subscriptions are stored in memory, **they will be lost when you deploy a 
 ```
 
 This will:
+
 1. Send a notification to all users: "Your subscription will expire soon. Tap to re-subscribe."
 2. When tapped, users will be prompted to re-subscribe
 3. Their subscription data will be cleared automatically
