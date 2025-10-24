@@ -66,9 +66,4 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo -e "${GREEN}You can now proceed with deployment!${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo -e "${YELLOW}💡 Next steps:${NC}"
-echo -e "   1. Wait a few minutes for users to receive notifications"
-echo -e "   2. Deploy your new version"
-echo -e "   3. Users will tap the notification and be prompted to re-subscribe"
-echo ""
 

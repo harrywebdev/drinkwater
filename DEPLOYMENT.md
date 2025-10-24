@@ -25,10 +25,6 @@ Before each deployment, send a notification to all subscribers telling them to r
 ./notify-before-deploy.sh https://your-production-url.fly.dev
 ```
 
-2. **Wait 2-5 minutes** for users to receive and potentially tap the notification
-
-3. **Deploy your new version** as usual
-
 ### Option 2: Manual API Call
 
 You can also manually trigger the notification endpoint:
@@ -55,13 +51,12 @@ The response will show how many notifications were sent:
 
 ```bash
 # Add this to your deployment script or run it manually before deploying
-curl -X POST https://your-production-url.fly.dev/api/notify-resubscribe && sleep 60 && fly deploy
+curl -X POST https://your-production-url.fly.dev/api/notify-resubscribe && fly deploy
 ```
 
 This will:
 1. Send notifications to all users
-2. Wait 60 seconds
-3. Deploy the new version
+2. Deploy the new version
 
 ## What Users Experience
 
