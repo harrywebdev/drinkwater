@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "deploy": "./notify-before-deploy.sh https://drinkwater.fly.dev && fly deploy"
   },
   "keywords": [
     "water",
