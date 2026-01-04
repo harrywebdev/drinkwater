@@ -191,7 +191,7 @@ Since subscriptions are stored in memory, **they will be lost when you deploy a 
 ./notify-before-deploy.sh
 
 # Or for production
-./notify-before-deploy.sh https://your-production-url.fly.dev
+./notify-before-deploy.sh https://your-production-url.com
 ```
 
 This will:

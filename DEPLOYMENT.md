@@ -23,7 +23,7 @@ Before each deployment, send a notification to all subscribers telling them to r
 ./notify-before-deploy.sh
 
 # For production server
-./notify-before-deploy.sh https://your-production-url.fly.dev
+./notify-before-deploy.sh https://your-production-url.com
 ```
 
 ### Option 2: Manual API Call
@@ -35,7 +35,7 @@ You can also manually trigger the notification endpoint:
 curl -X POST http://localhost:3000/api/notify-resubscribe
 
 # Production
-curl -X POST https://your-production-url.fly.dev/api/notify-resubscribe
+curl -X POST https://your-production-url.com/api/notify-resubscribe
 ```
 
 The response will show how many notifications were sent:
@@ -52,7 +52,7 @@ The response will show how many notifications were sent:
 
 ```bash
 # Add this to your deployment script or run it manually before deploying
-curl -X POST https://your-production-url.fly.dev/api/notify-resubscribe && fly deploy
+curl -X POST https://your-production-url.com/api/notify-resubscribe && disco deploy --project drinkwater
 ```
 
 This will:

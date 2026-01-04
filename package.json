@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "format": "prettier --write .",
-    "deploy": "./notify-before-deploy.sh https://drinkwater.fly.dev && fly deploy"
+    "deploy": "./notify-before-deploy.sh https://drinkwater.tatrgel.cz && disco deploy --project drinkwater"
   },
   "keywords": [
     "water",
